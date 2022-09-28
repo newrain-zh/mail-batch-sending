@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: mail-batch-sending
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    username: root
+    password: 123456
+    url: jdbc:mysql://localhost:3306/mail?useUnicode=true&allowPublicKeyRetrieval=false&useSSL=false&autoReconnect=true&zeroDateTimeBehavior=convertToNull
+
+mail:
+  job:
+    cron: 0 0/2 * * * ?
+
+
+mybatis-plus:
+  mapper-locations: classpath:mapper/**/*.xml
+  #实体扫描，多个package用逗号或者分号分隔
+  typeAliasesPackage: com.dia.project.*
+  global-config:
+    db-config:
+      logic-delete-value: 2
+      logic-not-delete-value: 0
+  configuration:
+    cache-enabled: false
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl

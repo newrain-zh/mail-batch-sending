@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mapper.TaskLockMapper">
+    <resultMap id="BaseResultMap" type="com.example.entity.pojo.TaskLock">
+        <id column="id" jdbcType="INTEGER" property="id"/>
+        <result column="task_status" jdbcType="TINYINT" property="taskStatus"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        id, task_status
+    </sql>
+    <select id="selectForKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from task_lock
+        where id = #{id,jdbcType=INTEGER} for update
+    </select>
+
+</mapper>

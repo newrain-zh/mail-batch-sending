@@ -46,7 +46,6 @@ public class MailResourceServiceImpl implements IMailResourceService {
             throw new BusinessException("未配置邮箱", 10002);
         }
         Date date = new Date();
-        //总次数
         QueryWrapper<MailSendLog> sendLogNewQueryWrapper = new QueryWrapper<>();
         sendLogNewQueryWrapper.in("send_status", Stream.of(MailSendStatusEnum.FAIL.getCode(), MailSendStatusEnum.SUCCESS.getCode()).collect(Collectors.toSet()));
         sendLogNewQueryWrapper.ge("send_time", DateUtil.beginOfDay(date).toString());
@@ -55,12 +54,13 @@ public class MailResourceServiceImpl implements IMailResourceService {
         if (todayTotal == null) {
             return;
         }
+        //总次数
         long mailTotal = batchMailConfigs.size();
         if (todayTotal >= (mailTotal * mailsConfig.getMailMaxDayTotal())) {
             log.info("今日邮箱资源已用尽");
             throw new BusinessException("今日邮箱资源已用尽", 10001);
         }
-
+        //
         List<MailSendLog> list = getMailUsedRecord(mailsConfig.getMailMinuteRate());
         if (list.size() >= mailsConfig.getMailMaxMinuteTotal() * mailTotal) {
             throw new BusinessException("当前邮箱资源已用尽", 10002);
@@ -105,19 +105,14 @@ public class MailResourceServiceImpl implements IMailResourceService {
             return info;
         }
         Date currDate = new Date();
-        String date = DateUtil.format(currDate, "yyyy-MM-dd");
-
         //获取当前mysql中的邮件资源情况
         QueryWrapper<MailSendLog> queryWrapper = new QueryWrapper<>();
-        queryWrapper.le("create_time", date + " 23:59:59");
         queryWrapper.le("create_time", DateUtil.endOfDay(currDate).toString());
-        queryWrapper.ge("create_time", date + " 00:00:00");
         queryWrapper.ge("create_time", DateUtil.beginOfDay(currDate).toString());
         List<MailSendLog> list = mailSendLogMapper.selectList(queryWrapper);
         if (CollectionUtil.isEmpty(list)) {
             return info;
         }
-
         List<MailSendLogDto> dtoList = BeanUtil.copyToList(list, MailSendLogDto.class);
         Map<String, Integer> mailCountMap = new HashMap<>(reachMailServiceConfigNews.size());
         int successTotal = 0;

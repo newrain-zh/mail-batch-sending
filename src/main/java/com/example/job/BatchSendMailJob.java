@@ -22,7 +22,7 @@ public class BatchSendMailJob {
     private IMailBatchSendService mailBatchService;
 
 
-    @Scheduled(cron = "${mail.job.cron:0 0/2 * * * ?}")
+    @Scheduled(cron = "${mail.job.cron:0 0/5 * * * ?}")
     public void batchMailJob() {
         log.info("batchMailJob===开始任务");
         Date currDate = new Date();

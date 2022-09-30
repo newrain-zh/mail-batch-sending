@@ -4,10 +4,11 @@ import com.example.entity.dto.BatchMailConfigDto;
 import com.example.entity.pojo.MailSendLog;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * 邮箱分配资源策略
+ * 一般邮箱服务商提供的邮箱都会有发送限制
+ * 这里用于控制分配邮件资源
  *
  * @author zhiqin.zhang
  */
@@ -18,9 +19,8 @@ public interface AllocMailResourceStrategy {
      *
      * @param mailResourceList 资源列表
      * @param list             待分配账号
-     * @return
      */
-    Map<String, Integer> allocMailResource(List<BatchMailConfigDto> mailResourceList, List<MailSendLog> list);
+    void allocMailResource(List<BatchMailConfigDto> mailResourceList, List<MailSendLog> list);
 
     /**
      * 策略类型和文件类型直接关联

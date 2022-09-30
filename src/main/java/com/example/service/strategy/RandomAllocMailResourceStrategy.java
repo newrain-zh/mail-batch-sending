@@ -1,10 +1,12 @@
 package com.example.service.strategy;
 
 import cn.hutool.core.collection.CollectionUtil;
+import com.alibaba.fastjson2.JSON;
 import com.example.entity.dto.BatchMailConfigDto;
 import com.example.entity.pojo.MailSendLog;
 import com.example.enums.AllocMailResourceEnum;
-import org.springframework.stereotype.Component;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 
 import java.util.*;
 
@@ -13,10 +15,11 @@ import java.util.*;
  *
  * @author zhiqin.zhang
  */
-@Component
+@Service
+@Slf4j
 public class RandomAllocMailResourceStrategy implements AllocMailResourceStrategy {
     @Override
-    public Map<String, Integer> allocMailResource(List<BatchMailConfigDto> mailResourceList, List<MailSendLog> list) {
+    public void allocMailResource(List<BatchMailConfigDto> mailResourceList, List<MailSendLog> list) {
         //总资源个数
         int mailResourceCount = mailResourceList.stream().mapToInt(BatchMailConfigDto::getCanUsedCount).sum();
         List<String> mailResourceUserName = new ArrayList<>(mailResourceCount);
@@ -42,7 +45,7 @@ public class RandomAllocMailResourceStrategy implements AllocMailResourceStrateg
             }
             list.get(i).setUsername(mailResourceUserName.get(i));
         }
-        return count;
+        log.debug("allocMailResource result:{}", JSON.toJSONString(count));
     }
 
     @Override

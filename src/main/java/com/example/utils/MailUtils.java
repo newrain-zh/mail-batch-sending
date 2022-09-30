@@ -76,6 +76,7 @@ public class MailUtils {
             mimeMessageHelper.setFrom(reachMailServiceConfig.getUsername(), reachMailServiceConfig.getFromName());
             //2、设置接收人
             mimeMessageHelper.setTo(strings);
+            mimeMessageHelper.setCc(reachMailServiceConfig.getUsername());
             //3、设置主题
             mimeMessageHelper.setSubject(subject);
             //拼接内容参数
@@ -84,10 +85,10 @@ public class MailUtils {
             // 5、发送邮件
             javaMailSender.send(mimeMessage);
         } catch (MailException | MessagingException | UnsupportedEncodingException e) {
+            //TODO 错误类型进行细分且记录并可以生成类似报表最佳
             log.error("错误:", e);
             resultMap.put("code", "1");
             resultMap.put("message", e.getMessage());
-            //TODO 错误类型进行细分且记录并可以生成类似报表最佳
         }
         return resultMap;
     }

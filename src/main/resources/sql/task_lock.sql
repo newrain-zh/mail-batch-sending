@@ -20,8 +20,7 @@ SET FOREIGN_KEY_CHECKS = 0;
 -- ----------------------------
 -- Table structure for task_lock
 -- ----------------------------
-DROP TABLE IF EXISTS `task_lock`;
-CREATE TABLE `task_lock` (
+CREATE TABLE IF NOT EXISTS`task_lock` (
   `transaction_id` int unsigned NOT NULL DEFAULT '1',
   `task_status` tinyint unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`transaction_id`) USING BTREE

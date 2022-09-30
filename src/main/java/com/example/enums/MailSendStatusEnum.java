@@ -11,8 +11,9 @@ public enum MailSendStatusEnum {
      * 0=发送中
      * 1=成功
      * 2=失败
+     * 3=保留状态
      */
-    SUCCESS(1), SENDING(0), FAIL(2), NO_SEND(3);
+    SENDING(0), SUCCESS(1), FAIL(2), NO_SEND(3);
 
     private final int code;
 

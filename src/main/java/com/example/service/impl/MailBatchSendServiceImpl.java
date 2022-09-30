@@ -8,16 +8,15 @@ import com.example.common.MysqlLock;
 import com.example.config.MailsConfig;
 import com.example.entity.dto.BatchMailConfigDto;
 import com.example.entity.pojo.MailSendLog;
-import com.example.enums.AllocMailResourceEnum;
 import com.example.enums.MailSendStatusEnum;
 import com.example.mapper.BatchMailConfigMapper;
 import com.example.mapper.MailSendLogMapper;
-import com.example.service.*;
+import com.example.service.IMailBatchSendService;
+import com.example.service.IMailResourceService;
+import com.example.service.IMailSendAsyncService;
 import com.example.service.strategy.AllocMailResourceStrategy;
 import com.example.service.strategy.AllocMailResourceStrategyContext;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StopWatch;
 
@@ -71,6 +70,20 @@ public class MailBatchSendServiceImpl implements IMailBatchSendService {
         batchSend(list);
     }
 
+    @Override
+    public void startByError(String date) {
+        QueryWrapper<MailSendLog> queryWrapper = new QueryWrapper<>();
+        queryWrapper.ge("create_time", date + " 00:00:00");
+        queryWrapper.le("create_time", date + " 23:59:59");
+        queryWrapper.eq("send_status", MailSendStatusEnum.FAIL.getCode());
+        List<MailSendLog> list = mailSendLogMapper.selectList(queryWrapper);
+        if (CollectionUtil.isEmpty(list)) {
+            log.info("batchMailJob-start没有需要发送邮件的用户 日期:{}", date);
+            return;
+        }
+        batchSend(list);
+    }
+
 
     public void batchSend(List<MailSendLog> sendList) {
         if (CollectionUtil.isEmpty(sendList)) {
@@ -88,20 +101,19 @@ public class MailBatchSendServiceImpl implements IMailBatchSendService {
                 log.info("batchSend===没有邮箱资源可以发送邮件");
                 return;
             }
-            log.info("batchSend===开始分配资源-获取邮箱资源详细:{}", JSON.toJSONString(mailResourceList.stream().collect(Collectors.toMap(BatchMailConfigDto::getUsername, BatchMailConfigDto::getCanUsedCount))));
+            log.debug("batchSend===开始分配资源-获取邮箱资源详细:{}", JSON.toJSONString(mailResourceList.stream().collect(Collectors.toMap(BatchMailConfigDto::getUsername, BatchMailConfigDto::getCanUsedCount))));
             Map<String, BatchMailConfigDto> map = mailResourceList.stream().collect(Collectors.toMap(BatchMailConfigDto::getUsername, Function.identity()));
-            log.info("batchSend===开始分配资源-总共资源数{}", sendList.size());
-            AllocMailResourceStrategy handler = allocMailResourceStrategyContext.getHandler(AllocMailResourceEnum.DEFAULT.getType());
-            Map<String, Integer> count = handler.allocMailResource(mailResourceList, sendList);
-            log.info("batchSend===开始分配资源-已配置邮箱目前资源:{}", JSON.toJSONString(count));
+            log.debug("batchSend===开始分配资源-总共资源数:{}", sendList.size());
+            AllocMailResourceStrategy handler = allocMailResourceStrategyContext.getHandler();
+            handler.allocMailResource(mailResourceList, sendList);
             //获取需发送邮件的客户列表
             List<MailSendLog> collect = sendList.stream().filter(d -> StringUtils.isNotBlank(d.getUsername())).collect(Collectors.toList());
-            log.info("batchSend===开始发送邮件,需发送邮件个数:{}", collect.size());
+            log.debug("batchSend===开始发送邮件-需发送邮件个数:{}", collect.size());
             int splitLen = collect.size() / mailsConfig.getMailPoolSize();
             List<List<MailSendLog>> split = CollectionUtil.split(collect, splitLen);
             int size = split.size();
             CountDownLatch countDownLatch = new CountDownLatch(size);
-            log.info("batchSend===执行发送任务-总共任务数:{}", size);
+            log.debug("batchSend===执行发送任务-总共任务数:{}", size);
             StopWatch stopWatch = new StopWatch();
             stopWatch.start();
             for (List<MailSendLog> list : split) {
@@ -109,12 +121,12 @@ public class MailBatchSendServiceImpl implements IMailBatchSendService {
             }
             countDownLatch.await();
             stopWatch.stop();
-            log.info("batchSend===执行发送任务结束:耗时{}", stopWatch.getTotalTimeSeconds());
+            log.debug("batchSend===执行发送任务结束:耗时{}", stopWatch.getTotalTimeSeconds());
         } catch (Exception e) {
             log.error("batchSend===发送失败", e);
         } finally {
             mysqlLock.unlock();
-            log.info("batchSend===finally释放锁");
+            log.debug("batchSend===finally释放锁");
         }
     }
 

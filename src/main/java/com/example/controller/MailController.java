@@ -7,9 +7,6 @@ import com.example.common.Result;
 import com.example.entity.dto.BatchMailConfigDto;
 import com.example.service.IMailBatchSendService;
 import com.example.service.IMailResourceService;
-import com.example.service.impl.MailBatchSendServiceImpl;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -25,8 +22,8 @@ import java.util.List;
  * @author zhiqin.zhang
  */
 @RestController
-@RequestMapping("/mail/resource")
-public class MailResourceController {
+@RequestMapping("/mail")
+public class MailController {
 
     @Resource
     private IMailResourceService mailResourceService;
@@ -45,6 +42,15 @@ public class MailResourceController {
             startDate = DateUtil.format(new Date(), "yyyy-MM-dd");
         }
         mailBatchSendService.start(startDate);
+        return Result.success();
+    }
+
+    @GetMapping("/start/error")
+    public Result<Void> startByError(@RequestParam("startDate") String startDate) {
+        if (StringUtils.isBlank(startDate)) {
+            startDate = DateUtil.format(new Date(), "yyyy-MM-dd");
+        }
+        mailBatchSendService.startByError(startDate);
         return Result.success();
     }
 }

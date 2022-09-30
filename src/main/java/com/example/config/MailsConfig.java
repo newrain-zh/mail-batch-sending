@@ -25,7 +25,9 @@ public class MailsConfig {
     @Value(("${minute.total:500}"))
     private int mailMaxMinuteTotal;
 
-
+    /**
+     * 用于控制发送的时间
+     */
     @Value("${minute.rate:15}")
     private int mailMinuteRate;
 
@@ -34,4 +36,17 @@ public class MailsConfig {
      */
     @Value("${pool.size:5}")
     private int mailPoolSize;
+
+    /**
+     * 分配策略 默认轮流分配
+     */
+    @Value("${alloc.mail.strategy:default}")
+    private String allocMailStrategy;
+
+    /**
+     * job执行周期
+     * 影响邮件发送数量、批次速率、补偿策略执行的成功率
+     */
+    @Value("${mail.job.cron:0 0/5 * * * ?}")
+    private String mailJobCron;
 }

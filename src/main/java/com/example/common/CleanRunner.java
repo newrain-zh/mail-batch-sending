@@ -3,6 +3,7 @@ package com.example.common;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 
@@ -18,6 +19,7 @@ public class CleanRunner implements ApplicationRunner {
     private MysqlLock mysqlLock;
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void run(ApplicationArguments args) {
         mysqlLock.unlock();
     }

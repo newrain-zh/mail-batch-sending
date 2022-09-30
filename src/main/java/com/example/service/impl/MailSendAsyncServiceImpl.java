@@ -42,8 +42,9 @@ public class MailSendAsyncServiceImpl implements IMailSendAsyncService {
         List<MailSendLog> updatedList = new ArrayList<>(batchUpdateSize);
         for (MailSendLog sendLogNew : collect) {
             BatchMailConfigDto dto = map.get(sendLogNew.getUsername());
-            Map<String, String> resultMap = MailUtils.sendMail(dto, new String[]{sendLogNew.getToUser()}, sendLogNew.getUsername(), sendLogNew.getSubject());
             MailSendLog updateEntity = new MailSendLog();
+            updateEntity.setSendTime(new Date());
+            Map<String, String> resultMap = MailUtils.sendMail(dto, new String[]{sendLogNew.getToUser()}, sendLogNew.getUsername(), sendLogNew.getSubject());
             updateEntity.setId(sendLogNew.getId());
             updateEntity.setUsername(sendLogNew.getUsername());
             if ("0".equals(resultMap.get("code"))) {
@@ -53,7 +54,6 @@ public class MailSendAsyncServiceImpl implements IMailSendAsyncService {
                 updateEntity.setSendFailResult(resultMap.get("message"));
             }
             updateEntity.setUpdateTime(currTime);
-            updateEntity.setSendTime(currTime);
             updatedList.add(updateEntity);
             if (updatedList.size() == batchUpdateSize) {
                 log.info("executeAsync===开始批量更新发送邮件记录");

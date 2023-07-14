@@ -14,7 +14,7 @@ public enum AllocMailResourceEnum {
     DEFAULT("default"), RANDOM("random"),
     ;
 
-    private String type;
+    private final String type;
 
     AllocMailResourceEnum(String type) {
         this.type = type;

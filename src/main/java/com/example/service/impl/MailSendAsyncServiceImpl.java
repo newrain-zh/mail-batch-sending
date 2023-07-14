@@ -37,6 +37,7 @@ public class MailSendAsyncServiceImpl implements IMailSendAsyncService {
     private int batchUpdateSize;
 
     @Async("asyncServiceExecutor")
+    @Override
     public void executeAsync(List<MailSendLog> collect, Map<String, BatchMailConfigDto> map, CountDownLatch countDownLatch) {
         Date currTime = new Date();
         List<MailSendLog> updatedList = new ArrayList<>(batchUpdateSize);
